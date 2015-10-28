@@ -10,13 +10,17 @@ import com.voyager.btchat.Utils.Constant;
 import java.io.IOException;
 
 /**
+ * 监听外来蓝牙请求线程类
  * Created by wuhaojie on 2015/10/28.
  */
 public class AcceptThread extends Thread {
     private static final String TAG = "AcceptThread";
+    //服务端socket
     private BluetoothServerSocket mServerSocket = null;
     //private BluetoothAdapter mAdapter;
+    //连接类型
     private String mSocketType;
+    //连接状态：Constant接口
     private int mState;
 
     public AcceptThread(boolean secure, BluetoothAdapter mAdapter) {
@@ -42,11 +46,11 @@ public class AcceptThread extends Thread {
         BluetoothSocket socket = null;
 
         //只要没有连接就一直监听
-        while(mState != Constant.STATE_CONNECTED){
+        while (mState != Constant.STATE_CONNECTED) {
             try {
                 socket = mServerSocket.accept();
             } catch (IOException e) {
-                Log.e(TAG, "SocketType: "+mSocketType+"accept() failed...");
+                Log.e(TAG, "SocketType: " + mSocketType + "accept() failed...");
                 e.printStackTrace();
             }
             /*
@@ -60,13 +64,12 @@ public class AcceptThread extends Thread {
     }
 
 
-
-    public void cancel(){
-        Log.d(TAG, "SocketType: "+mSocketType+"cancel() "+this);
+    public void cancel() {
+        Log.d(TAG, "SocketType: " + mSocketType + "cancel() " + this);
         try {
             mServerSocket.close();
         } catch (IOException e) {
-            Log.d(TAG, "SocketType: "+mSocketType+"cancel() failed"+this);
+            Log.d(TAG, "SocketType: " + mSocketType + "cancel() failed" + this);
         }
 
     }
