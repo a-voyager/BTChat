@@ -3,6 +3,7 @@ package com.voyager.btchat;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -111,7 +112,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void connectDevices(Intent data, boolean b) {
-
+    /**
+     * 连接蓝牙设备
+     */
+    private void connectDevices(Intent data, boolean secure) {
+        String addr = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(addr);
+        mBluetoothChatService.connect(device, secure);
     }
+
+
+    /**
+     * 确保本设备对外可见
+     */
+    private void ensureDiscoverable() {
+        if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(intent);
+        }
+    }
+
+
+
+
+
+
 }
