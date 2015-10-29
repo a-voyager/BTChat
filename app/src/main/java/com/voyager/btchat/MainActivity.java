@@ -1,6 +1,7 @@
 package com.voyager.btchat;
 
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
@@ -88,6 +89,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupChat() {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constant.REQUEST_CONNECT_DEVICE_SECURE:
+                if (resultCode == Activity.RESULT_OK) {
+                    connectDevices(data, true);
+                }
+                break;
+            case Constant.REQUEST_ENABLE_BT:
+                if (resultCode == Activity.RESULT_OK) {
+                    setupChat();
+                } else {
+                    Toast.makeText(MainActivity.this, "蓝牙开启失败！", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+        }
+    }
+
+    private void connectDevices(Intent data, boolean b) {
 
     }
 }
