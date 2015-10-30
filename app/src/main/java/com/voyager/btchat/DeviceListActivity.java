@@ -87,7 +87,20 @@ public class DeviceListActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 搜索设备
+     */
     private void doDiscovery() {
+        setProgressBarIndeterminateVisibility(true);
+        setTitle("扫描设备中");
+
+        findViewById(R.id.dl_title_new_devices).setVisibility(View.VISIBLE);
+
+        if (mBluetoothAdapter.isDiscovering()) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
+
+        mBluetoothAdapter.startDiscovery();
 
     }
 
