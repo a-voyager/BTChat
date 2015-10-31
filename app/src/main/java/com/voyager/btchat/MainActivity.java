@@ -6,9 +6,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -25,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_send;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothChatService mBluetoothChatService = null;
+    private BluetoothChatService mChatService;
+    private StringBuffer mStringBuffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +94,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupChat() {
+        btn_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
+            }
+        });
+
+        mChatService = new BluetoothChatService(this, mHandler);
+
+        mStringBuffer = new StringBuffer("");
+
+
+    }
+
+    /**
+     * 发送消息
+     */
+    private void sendMessage() {
 
     }
 
@@ -135,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private Handler mHandler = new Handler(){};
 
 
 
