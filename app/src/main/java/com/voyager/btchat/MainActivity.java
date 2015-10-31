@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,7 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothChatService mBluetoothChatService = null;
     private BluetoothChatService mChatService;
-    private StringBuffer mStringBuffer;
+    private StringBuffer mOutStringBuffer;
+    private String mConnecedDeviceName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         mChatService = new BluetoothChatService(this, mHandler);
 
-        mStringBuffer = new StringBuffer("");
+        mOutStringBuffer = new StringBuffer("");
 
 
     }
@@ -112,7 +114,18 @@ public class MainActivity extends AppCompatActivity {
      * 发送消息
      */
     private void sendMessage() {
-
+        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+            Toast.makeText(MainActivity.this, "未连接蓝牙设备!", Toast.LENGTH_SHORT).show();
+            et_sendmessage.setText("");
+            return;
+        }
+        String text = et_sendmessage.getText().toString();
+        if (text.length() > 0) {
+            byte[] textBytes = text.getBytes();
+            mChatService.write(textBytes);
+            mOutStringBuffer.setLength(0);
+            et_sendmessage.setText(mOutStringBuffer);
+        }
     }
 
     @Override
@@ -156,9 +169,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Constant.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case BluetoothChatService.STATE_CONNECTED:
+                            setStatus(1, mConnecedDeviceName, "连接到 " + mConnecedDeviceName);
+                            break;
+                        case BluetoothChatService.STATE_CONNECTING:
+                            setStatus("连接中...");
+                            break;
+                        case BluetoothChatService.STATE_LISTEN:
+                        case BluetoothChatService.STATE_NONE:
+                            setStatus("无连接");
+                            break;
+                    }
+                    break;
+                case Constant.MESSAGE_WRITE:
+                    break;
+                case Constant.MESSAGE_READ:
+                    break;
+                case Constant.MESSAGE_DEVICE_NAME:
+                    mConnecedDeviceName = msg.getData().getString(Constant.DEVICE_NAME);
+                    break;
+                case Constant.MESSAGE_TOAST:
+                    break;
+            }
+        }
+    };
 
-    private Handler mHandler = new Handler(){};
+    private void setStatus(int i, String mConnecedDeviceName, String s) {
 
+    }
+
+    private void setStatus(CharSequence title) {
+
+    }
 
 
 }
