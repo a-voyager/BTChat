@@ -221,12 +221,42 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setStatus(int i, String mConnecedDeviceName, String s) {
-
+    /**
+     * actionbar
+     */
+    private void setStatus(int resId) {
+        if (null == this) {
+            return;
+        }
+        ActionBar actionBar = getSupportActionBar();
+        if (null == actionBar) {
+            return;
+        }
+        actionBar.setSubtitle(resId);
     }
 
-    private void setStatus(CharSequence title) {
 
+    /**
+     * actionbar
+     */
+    private void setStatus(int i, String mConnecedDeviceName, String s) {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(mConnecedDeviceName);
+        actionBar.setSubtitle(s);
+    }
+
+    /**
+     * 设置actionbar标题
+     */
+    private void setStatus(CharSequence title) {
+        if (null == this) {
+            return;
+        }
+        ActionBar actionBar = getSupportActionBar();
+        if (null == actionBar) {
+            return;
+        }
+        actionBar.setTitle(title);
     }
 
 
