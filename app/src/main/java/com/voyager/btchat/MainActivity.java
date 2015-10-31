@@ -188,17 +188,38 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case Constant.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    String writeMessage = new String(writeBuf);
+                    send(writeMessage);
                     break;
                 case Constant.MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    receive(readMessage);
+
                     break;
                 case Constant.MESSAGE_DEVICE_NAME:
                     mConnecedDeviceName = msg.getData().getString(Constant.DEVICE_NAME);
+                    if (this != null) {
+                        Toast.makeText(MainActivity.this, "Connected to" + mConnecedDeviceName, Toast.LENGTH_SHORT).show();
+                    }
                     break;
                 case Constant.MESSAGE_TOAST:
+                    if (this != null) {
+                        Toast.makeText(MainActivity.this, msg.getData().getString(Constant.TOAST), Toast.LENGTH_SHORT).show();
+                    }
                     break;
             }
         }
     };
+
+    private void receive(String readMessage) {
+
+    }
+
+    private void send(String writeMessage) {
+
+    }
 
     private void setStatus(int i, String mConnecedDeviceName, String s) {
 
