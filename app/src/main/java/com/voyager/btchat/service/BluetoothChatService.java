@@ -15,6 +15,7 @@ import com.voyager.btchat.thread.ConnectThread;
 import com.voyager.btchat.thread.ConnectedThread;
 
 /**
+ * 提供蓝牙控制服务
  * Created by wuhaojie on 2015/10/29.
  */
 public class BluetoothChatService {
@@ -29,10 +30,10 @@ public class BluetoothChatService {
     private final Handler mHandler;
     private final BluetoothAdapter mAdapter;
 
-    private AcceptThread mSecureAcceptThread;
-    private AcceptThread mInSecureAcceptThread;
-    private ConnectThread mConnectThread;
-    private ConnectedThread mConnectedThread;
+    private static AcceptThread mSecureAcceptThread;
+    private static AcceptThread mInSecureAcceptThread;
+    private static ConnectThread mConnectThread;
+    private static ConnectedThread mConnectedThread;
 
     private int mState;
 
@@ -58,6 +59,22 @@ public class BluetoothChatService {
     public synchronized void setState(int mState) {
         this.mState = mState;
         mHandler.obtainMessage(Constant.MESSAGE_STATE_CHANGE, mState, -1).sendToTarget();
+    }
+
+    public static AcceptThread getmSecureAcceptThread() {
+        return mSecureAcceptThread;
+    }
+
+    public static AcceptThread getmInSecureAcceptThread() {
+        return mInSecureAcceptThread;
+    }
+
+    public static ConnectThread getmConnectThread() {
+        return mConnectThread;
+    }
+
+    public static ConnectedThread getmConnectedThread() {
+        return mConnectedThread;
     }
 
     /**
@@ -90,7 +107,30 @@ public class BluetoothChatService {
 
     }
 
+    /**
+     * kill all
+     */
     public synchronized void stop() {
+        Log.d(TAG, "stop()");
+
+        if (mConnectThread != null) {
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+            mConnectedThread = null;
+        }
+        if (mSecureAcceptThread == null) {
+            mSecureAcceptThread = new AcceptThread(true, mAdapter);
+            mSecureAcceptThread.start();
+        }
+        if (mInSecureAcceptThread == null) {
+            mInSecureAcceptThread = new AcceptThread(false, mAdapter);
+            mInSecureAcceptThread.start();
+        }
+
+        setState(STATE_NONE);
     }
 
     public synchronized void connect(BluetoothDevice device, boolean secure) {
@@ -109,7 +149,7 @@ public class BluetoothChatService {
             mConnectedThread = null;
         }
 
-        mConnectThread = new ConnectThread(device, secure, mAdapter);
+        mConnectThread = new ConnectThread(device, secure, mAdapter, this, mConnectThread, mConnectedThread, mSecureAcceptThread, mInSecureAcceptThread);
         mConnectThread.start();
         setState(STATE_CONNECTING);
 
@@ -153,7 +193,41 @@ public class BluetoothChatService {
     }
 
 
-    public void write(byte[] textBytes) {
-
+    public void write(byte[] out) {
+        ConnectedThread cThread;
+        synchronized (this) {
+            if (mState != STATE_CONNECTED) {
+                return;
+            }
+            cThread = this.mConnectedThread;
+        }
+        cThread.write(out);
     }
+
+    /**
+     * 连接失败
+     * 尝试重新启动监听模式并且通知 UI层
+     */
+    public void connectedFailed() {
+        Message message = mHandler.obtainMessage(Constant.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(Constant.TOAST, "Unable to connect device");
+        message.setData(bundle);
+        mHandler.sendMessage(message);
+        //restart for listening mode
+        BluetoothChatService.this.start();
+    }
+
+    /**
+     * 连接丢失 通知UI层
+     */
+    public void connectionLost() {
+        Message message = mHandler.obtainMessage(Constant.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(Constant.TOAST, "Device connection was lost");
+        message.setData(bundle);
+        mHandler.sendMessage(message);
+    }
+
+
 }
