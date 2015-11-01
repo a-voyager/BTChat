@@ -17,8 +17,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.voyager.btchat.Utils.ChatMsgViewAdapter;
 import com.voyager.btchat.Utils.Constant;
+import com.voyager.btchat.entities.ChatMsgEntity;
 import com.voyager.btchat.service.BluetoothChatService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothChatService mChatService;
     private StringBuffer mOutStringBuffer;
     private String mConnecedDeviceName;
+    private List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
+    private ChatMsgViewAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData() {
-
+        mAdapter = new ChatMsgViewAdapter(this, mDataArrays);
+        main_lv.setAdapter(mAdapter);
     }
 
     private void initView() {
@@ -214,7 +222,18 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void receive(String readMessage) {
+        ChatMsgEntity chatMsgEntity = new ChatMsgEntity();
+        chatMsgEntity.setDate(getDate());
+        chatMsgEntity.setName(mConnecedDeviceName);
+        chatMsgEntity.setMsgType(true);
+        chatMsgEntity.setText(readMessage);
+        mDataArrays.add(chatMsgEntity);
 
+
+    }
+
+    private String getDate() {
+        return null;
     }
 
     private void send(String writeMessage) {
