@@ -11,6 +11,8 @@ import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    
 
     private void initData() {
         mAdapter = new ChatMsgViewAdapter(this, mDataArrays);
@@ -300,4 +301,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_to_device_list:
+                Intent intent = new Intent(MainActivity.this, DeviceListActivity.class);
+                startActivityForResult(intent, Constant.REQUEST_CONNECT_DEVICE_SECURE);
+                return true;
+            case R.id.menu_show_to_others:
+                ensureDiscoverable();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
