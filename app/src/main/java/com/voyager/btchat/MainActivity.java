@@ -23,6 +23,7 @@ import com.voyager.btchat.entities.ChatMsgEntity;
 import com.voyager.btchat.service.BluetoothChatService;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    
 
     private void initData() {
         mAdapter = new ChatMsgViewAdapter(this, mDataArrays);
@@ -228,16 +231,34 @@ public class MainActivity extends AppCompatActivity {
         chatMsgEntity.setMsgType(true);
         chatMsgEntity.setText(readMessage);
         mDataArrays.add(chatMsgEntity);
-
-
+        mAdapter.notifyDataSetChanged();
+        main_lv.setSelection(main_lv.getCount() - 1);
     }
 
+    /**
+     * 获取日期函数
+     */
     private String getDate() {
-        return null;
+        Calendar calendar = Calendar.getInstance();
+        String year = String.valueOf(calendar.get(Calendar.YEAR));
+        String month = String.valueOf(calendar.get(Calendar.MONTH));
+        String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH) + 1);
+        String hour = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+        String min = String.valueOf(calendar.get(Calendar.MINUTE));
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(year + "-" + month + "-" + day + " " + hour + ":" + min);
+        return buffer.toString();
     }
 
     private void send(String writeMessage) {
-
+        ChatMsgEntity chatMsgEntity = new ChatMsgEntity();
+        chatMsgEntity.setDate(getDate());
+        chatMsgEntity.setName("我");
+        chatMsgEntity.setMsgType(false);
+        chatMsgEntity.setText(writeMessage);
+        mDataArrays.add(chatMsgEntity);
+        mAdapter.notifyDataSetChanged();
+        main_lv.setSelection(main_lv.getCount() - 1);
     }
 
     /**
