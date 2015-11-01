@@ -8,17 +8,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.Set;
 
-public class DeviceListActivity extends AppCompatActivity {
+public class DeviceListActivity extends Activity {
 
     /**
      * Return Intent extra
@@ -68,12 +68,18 @@ public class DeviceListActivity extends AppCompatActivity {
      */
     private void initList() {
         //Array Adapter 已配对设备列表 新发现设备列表
-        pairedArrayAdapter = new ArrayAdapter<>(this, R.layout.dl_device_name);
-        mNewDevicesArrayAdapter = new ArrayAdapter<>(this, R.layout.dl_device_name);
+        pairedArrayAdapter = new ArrayAdapter<String>(this, R.layout.dl_device_name);
+        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.dl_device_name);
 
         ListView lv_paired_devices = (ListView) findViewById(R.id.dl_paired_devices);
         lv_paired_devices.setAdapter(pairedArrayAdapter);
         lv_paired_devices.setOnItemClickListener(mOnItemClickListener);
+
+        ListView lv_new = (ListView) findViewById(R.id.dl_new_devices);
+        lv_new.setAdapter(mNewDevicesArrayAdapter);
+        lv_new.setOnItemClickListener(mOnItemClickListener);
+
+
     }
 
     private void initView() {
@@ -108,6 +114,18 @@ public class DeviceListActivity extends AppCompatActivity {
     private AdapterView.OnItemClickListener mOnItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            mBluetoothAdapter.cancelDiscovery();
+
+            //最后17位为设备 Mac地址
+            //上文有 pairedArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            String info = ((TextView) view).getText().toString();
+            String address = info.substring(info.length() - 17);
+
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
+
+            setResult(Activity.RESULT_OK, intent);
+            finish();
 
         }
     };
@@ -116,9 +134,30 @@ public class DeviceListActivity extends AppCompatActivity {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                setProgressBarIndeterminateVisibility(false);
+                setTitle("请选择要连接的设备");
+                if (mNewDevicesArrayAdapter.getCount() == 0) {
+                    String noDevice = "没有发现设备";
+                    mNewDevicesArrayAdapter.add(noDevice);
+                }
+            }
         }
     };
 
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mBluetoothAdapter != null) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
+        this.unregisterReceiver(mReceiver);
+    }
 }
