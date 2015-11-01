@@ -68,8 +68,9 @@ public class DeviceListActivity extends Activity {
      */
     private void initList() {
         //Array Adapter 已配对设备列表 新发现设备列表
-        pairedArrayAdapter = new ArrayAdapter<String>(this, R.layout.dl_device_name);
-        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.dl_device_name);
+        pairedArrayAdapter = new ArrayAdapter<String>(this, R.layout.dl_device_name, R.id.dl_item_name);
+        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.dl_device_name, R.id.dl_item_name);
+
 
         ListView lv_paired_devices = (ListView) findViewById(R.id.dl_paired_devices);
         lv_paired_devices.setAdapter(pairedArrayAdapter);
@@ -118,6 +119,7 @@ public class DeviceListActivity extends Activity {
 
             //最后17位为设备 Mac地址
             //上文有 pairedArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+//            String info = ((TextView) view).getText().toString();
             String info = ((TextView) view).getText().toString();
             String address = info.substring(info.length() - 17);
 
