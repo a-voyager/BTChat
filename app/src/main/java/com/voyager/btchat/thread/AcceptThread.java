@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import com.voyager.btchat.Utils.Constant;
+import com.voyager.btchat.service.BluetoothChatService;
 
 import java.io.IOException;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
  */
 public class AcceptThread extends Thread {
     private static final String TAG = "AcceptThread";
+    private final BluetoothChatService mBluetoothChatService;
     //服务端socket
     private BluetoothServerSocket mServerSocket = null;
     //private BluetoothAdapter mAdapter;
@@ -23,7 +25,8 @@ public class AcceptThread extends Thread {
     //连接状态：Constant接口
     private int mState;
 
-    public AcceptThread(boolean secure, BluetoothAdapter mAdapter) {
+    public AcceptThread(boolean secure, BluetoothAdapter mAdapter, BluetoothChatService bluetoothChatService) {
+        this.mBluetoothChatService = bluetoothChatService;
         BluetoothServerSocket tmp = null;
         mSocketType = secure ? "secure" : "Insecure";
 
@@ -51,13 +54,13 @@ public class AcceptThread extends Thread {
                 socket = mServerSocket.accept();
             } catch (IOException e) {
                 Log.e(TAG, "SocketType: " + mSocketType + "accept() failed...");
-                e.printStackTrace();
+                break;
             }
-            /*
-            if(socket != null){
-                synchronized (){}
+
+            if (socket != null) {
+                synchronized (mBluetoothChatService) {
+                }
             }
-            */
 
 
         }
