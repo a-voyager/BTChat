@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import com.voyager.btchat.Utils.Constant;
+import com.voyager.btchat.service.BluetoothChatService;
 
 import java.io.IOException;
 
@@ -19,10 +20,20 @@ public class ConnectThread extends Thread {
     private final BluetoothDevice mDevice;
     private String mSocketType;
     private BluetoothAdapter mAdapter;
+    private BluetoothChatService mBluetoothChatService;
+    private ConnectThread mConnetThread;
+    private ConnectedThread mConnetedThread;
+    private AcceptThread mSecureAcceptThread;
+    private AcceptThread mInSecureAcceptThread;
 
-    public ConnectThread(BluetoothDevice mDevice, boolean secure, BluetoothAdapter mAdapter) {
+    public ConnectThread(BluetoothDevice mDevice, boolean secure, BluetoothAdapter mAdapter, BluetoothChatService mBluetoothChatService, ConnectThread mConnetThread, ConnectedThread mConnetedThread, AcceptThread mSecureAcceptThread, AcceptThread mInSecureAcceptThread) {
         this.mAdapter = mAdapter;
+        this.mBluetoothChatService = mBluetoothChatService;
+        this.mConnetedThread = mConnetedThread;
+        this.mSecureAcceptThread = mSecureAcceptThread;
+        this.mInSecureAcceptThread = mInSecureAcceptThread;
         BluetoothSocket tmp = null;
+        this.mConnetThread = mConnetThread;
         this.mDevice = mDevice;
         mSocketType = secure ? "secure" : "Insecure";
 
@@ -53,27 +64,60 @@ public class ConnectThread extends Thread {
             try {
                 mSocket.close();
             } catch (IOException e1) {
-                Log.e(TAG, "BT close failed...socketType:"+mSocketType);
+                Log.e(TAG, "BT close failed...socketType:" + mSocketType);
             }
-            connectFailed();
+            mBluetoothChatService.connectedFailed();
             return;
         }
 
-        /*
-        synchronized (){}
-        */
+
+        synchronized (mBluetoothChatService) {
+            mConnetThread = null;
+        }
 
         //连接完成 开始监听
-        connected(mSocket, mDevice, mSocketType);
+        mBluetoothChatService.connected(mSocket, mDevice, mSocketType);
 
 
     }
+/*
+    private void connected(BluetoothSocket mSocket, BluetoothDevice mDevice, String socketType) {
+        Log.d(TAG, "connected, SocketType="+socketType);
 
-    private void connected(BluetoothSocket mSocket, BluetoothDevice mDevice, String mSocketType) {
+        //已完成连接 结束ConnectThread
+        if (mConnetThread != null){
+            mConnetThread.cancel();
+            mConnetThread = null;
+        }
+        //结束所有正在运行的ConnectedThread
+        if (mConnetedThread != null){
+            mConnetedThread.cancel();
+            mConnetedThread = null;
+        }
+        if (mSecureAcceptThread != null){
+            mSecureAcceptThread.cancel();
+            mSecureAcceptThread = null;
+        }
+        if (mInSecureAcceptThread != null){
+            mInSecureAcceptThread.cancel();
+            mInSecureAcceptThread = null;
+        }
+
+
+
 
     }
 
     private void connectFailed() {
 
+    }
+    */
+
+    public void cancel() {
+        try {
+            mSocket.close();
+        } catch (IOException e) {
+            Log.e(TAG, "close() failed, socketType = " + mSocket, e);
+        }
     }
 }
