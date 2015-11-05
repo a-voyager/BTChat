@@ -37,6 +37,7 @@ public class BluetoothChatService {
 
     private int mState;
 
+
     /**
      * constructor
      */
@@ -61,21 +62,6 @@ public class BluetoothChatService {
         mHandler.obtainMessage(Constant.MESSAGE_STATE_CHANGE, mState, -1).sendToTarget();
     }
 
-    public static AcceptThread getmSecureAcceptThread() {
-        return mSecureAcceptThread;
-    }
-
-    public static AcceptThread getmInSecureAcceptThread() {
-        return mInSecureAcceptThread;
-    }
-
-    public static ConnectThread getmConnectThread() {
-        return mConnectThread;
-    }
-
-    public static ConnectedThread getmConnectedThread() {
-        return mConnectedThread;
-    }
 
     /**
      * 开启BluetoothChatService服务
@@ -83,7 +69,7 @@ public class BluetoothChatService {
      * calling by onResume in MainActivity
      */
     public synchronized void start() {
-        Log.d(TAG, "start()");
+        Log.d(TAG, "bluetoothChatService start()");
 
         if (mConnectedThread != null) {
             mConnectedThread.cancel();
@@ -97,11 +83,11 @@ public class BluetoothChatService {
         setState(STATE_LISTEN);
 
         if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread(true, mAdapter);
+            mSecureAcceptThread = new AcceptThread(true, mAdapter, this);
             mSecureAcceptThread.start();
         }
         if (mInSecureAcceptThread == null) {
-            mInSecureAcceptThread = new AcceptThread(false, mAdapter);
+            mInSecureAcceptThread = new AcceptThread(false, mAdapter, this);
             mInSecureAcceptThread.start();
         }
 
@@ -121,13 +107,13 @@ public class BluetoothChatService {
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
-        if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread(true, mAdapter);
-            mSecureAcceptThread.start();
+        if (mSecureAcceptThread != null) {
+            mSecureAcceptThread.cancel();
+            mSecureAcceptThread = null;
         }
-        if (mInSecureAcceptThread == null) {
-            mInSecureAcceptThread = new AcceptThread(false, mAdapter);
-            mInSecureAcceptThread.start();
+        if (mInSecureAcceptThread != null) {
+            mInSecureAcceptThread.cancel();
+            mInSecureAcceptThread = null;
         }
 
         setState(STATE_NONE);
@@ -179,7 +165,7 @@ public class BluetoothChatService {
         }
 
         //开启连接线程
-        mConnectedThread = new ConnectedThread(socket, socketType, this);
+        mConnectedThread = new ConnectedThread(socket, socketType, this, mHandler);
         mConnectedThread.start();
 
         //将已经连接的蓝牙设备名称发送给UI Activity
@@ -199,7 +185,7 @@ public class BluetoothChatService {
             if (mState != STATE_CONNECTED) {
                 return;
             }
-            cThread = this.mConnectedThread;
+            cThread = mConnectedThread;
         }
         cThread.write(out);
     }
