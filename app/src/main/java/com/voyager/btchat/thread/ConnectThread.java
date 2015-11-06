@@ -22,16 +22,16 @@ public class ConnectThread extends Thread {
     private BluetoothAdapter mAdapter;
     private BluetoothChatService mBluetoothChatService;
     private ConnectThread mConnetThread;
-    private ConnectedThread mConnetedThread;
-    private AcceptThread mSecureAcceptThread;
-    private AcceptThread mInSecureAcceptThread;
+//    private ConnectedThread mConnetedThread;
+//    private AcceptThread mSecureAcceptThread;
+//    private AcceptThread mInSecureAcceptThread;
 
     public ConnectThread(BluetoothDevice mDevice, boolean secure, BluetoothAdapter mAdapter, BluetoothChatService mBluetoothChatService, ConnectThread mConnetThread, ConnectedThread mConnetedThread, AcceptThread mSecureAcceptThread, AcceptThread mInSecureAcceptThread) {
         this.mAdapter = mAdapter;
         this.mBluetoothChatService = mBluetoothChatService;
-        this.mConnetedThread = mConnetedThread;
-        this.mSecureAcceptThread = mSecureAcceptThread;
-        this.mInSecureAcceptThread = mInSecureAcceptThread;
+//        this.mConnetedThread = mConnetedThread;
+//        this.mSecureAcceptThread = mSecureAcceptThread;
+//        this.mInSecureAcceptThread = mInSecureAcceptThread;
         BluetoothSocket tmp = null;
         this.mConnetThread = mConnetThread;
         this.mDevice = mDevice;
